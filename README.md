@@ -1,276 +1,194 @@
 [English](README.md) | [ไทย](README.th.md)
 
-# Project Store — Wedding Dress Rental & Appointments
+<h1 align="center">Project Store — Wedding Dress Rental</h1>
 
-A wedding-dress rental shop website with an online booking and appointment system, built with [Next.js](https://nextjs.org) (App Router) and [Supabase](https://supabase.com).
+<p align="center">
+  A wedding-dress and Lanna-costume rental site with online booking, availability calendars, and an admin dashboard.
+</p>
+
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#tech-stack">Tech stack</a> ·
+  <a href="#project-structure">Structure</a> ·
+  <a href="#supabase-setup">Supabase</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="#environment-variables">Environment</a> ·
+  <a href="#usage">Usage</a> ·
+  <a href="#notes">Notes</a>
+</p>
+
+---
 
 ## Overview
 
-Project Store is a full-stack web application for a wedding-dress / Lanna-costume rental business. Customers browse a catalog of dresses, check real-time availability on a calendar, book rentals for a date range, and schedule fitting or consultation appointments. Shop owners get an admin dashboard to manage products, categories, appointments, rentals, date locks, notification flows, and store-wide settings.
+Project Store is a full-stack web application for a wedding-dress rental business. Customers browse a catalog, check availability on a per-product calendar, book a rental for an inclusive date range, and schedule fitting or consultation appointments. Shop owners get an admin dashboard for products, categories, appointment services, appointments, rentals, date locks, notifications, and store settings.
 
-The availability model is date-range based and assumes **one physical unit per product**: a product is unavailable on any date that is covered by a date lock, an active rental, or (optionally) a fitting appointment.
+Availability is date-range based and assumes **one physical unit per product**: a product is unavailable on any date covered by a date lock, a non-cancelled rental, or (optionally) a fitting appointment. Database exclusion constraints back up the application-level checks against double booking.
 
 ## Features
 
-- **Product catalog** — products with images, rental price, and deposit; category filtering, search, sorting, and pagination.
-- **Availability calendar** — per-product calendar showing free/unavailable dates (merges date locks, rentals, and appointments); clicking a date reveals the details.
-- **Rentals** — customers book a dress for an inclusive start/end date range; the system validates availability on submit and blocks overlapping bookings at the database level.
-- **Appointments** — book a fitting (`try_on`) or consultation (`consultation`) in a business-hours time slot, optionally linked to a product.
-- **Date locks** — admins can lock a date range for a product (e.g. maintenance) so it cannot be booked.
-- **User accounts** — email/password authentication via Supabase Auth, profile management, and notifications.
-- **Admin dashboard** — metrics and charts (revenue over the last 30 days, rentals by status, bookings), plus full CRUD for products, categories, appointment services, appointments, rentals, and store settings.
-- **Storefront** — home, about, contact, product listing/detail, profile, and notifications pages, with a theme system (light/dark plus configurable brand color/theme).
-- **First-admin bootstrap** — the first authenticated user can claim the admin role atomically via `/setup-admin`.
+- **Product catalog** — images, rental price, deposit, category filtering, search, sorting, and pagination (12 products per page).
+- **Availability calendar** — per-product free/unavailable dates merging date locks, rentals, and appointments; clicking a date reveals details.
+- **Rentals** — book an inclusive start/end range with pickup or delivery, validate availability on submit, and block overlaps at the database level.
+- **Appointments** — book a fitting (`try_on`) or consultation (`consultation`) in 09:00–18:00 slots, optionally linked to a product.
+- **Date locks** — admins lock a date range for a product (for example maintenance) so it cannot be booked.
+- **User accounts** — email/password authentication through Supabase Auth, profile management, and in-app notifications.
+- **Admin dashboard** — totals for rentals, revenue, pending rentals, and products, plus revenue, rental-status, booking, and booking-status charts and top products.
+- **Admin CRUD** — products, categories, appointment services, appointments, rentals, and store settings.
+- **Storefront** — home, about, contact, products, rentals, appointments, profile, and notifications, with light/dark themes and a configurable brand color.
+- **First-admin bootstrap** — `/setup-admin` promotes the first authenticated user atomically through `claim_first_admin()`.
 
-## Tech Stack
+## Tech stack
 
 | Area | Choice |
-|------|--------|
-| Framework | Next.js (App Router, Server Components, Server Actions) |
+| --- | --- |
+| Framework | [Next.js](https://nextjs.org) App Router, Server Components, Server Actions (`next: "latest"`) |
 | Language | TypeScript |
-| Database & Auth | Supabase (PostgreSQL, Auth, Row Level Security, Storage) |
-| Data access | `@supabase/supabase-js` / `@supabase/ssr` for RLS-aware queries, plus Drizzle ORM for a typed query builder |
+| Database & Auth | [Supabase](https://supabase.com) (PostgreSQL, Auth, Row Level Security, Storage) |
+| Data access | `@supabase/supabase-js` / `@supabase/ssr` for RLS-aware queries + [Drizzle ORM](https://orm.drizzle.team) for typed queries |
 | Schema / migrations | Supabase SQL migrations (source of truth) + `drizzle-kit` |
-| UI | Tailwind CSS, shadcn/ui (New York style), Radix UI primitives, lucide-react icons |
+| UI | Tailwind CSS v3, shadcn/ui (New York), Radix UI, lucide-react |
 | Charts | Recharts |
-| Animation | GSAP, custom reveal components |
-| Theming | next-themes + `store_settings` theme config |
+| Animation | GSAP + custom reveal components |
+| Theming | next-themes + theme values in `store_settings` |
 | Testing | Vitest |
+| Package manager | npm (`package-lock.json`) |
 
-## Project Structure
+## Project structure
 
 ```
-app/                     Next.js App Router
-  (home)/                Landing page (route group)
-  about/ contact/        Static marketing pages
-  products/              Catalog list + [slug] detail, filter/sort/pagination
-  rentals/               Rental list, new/ (booking form), [id]/ (detail)
-  appointments/          Appointment list, book/, [id]/ (detail)
-  notifications/         User notifications
-  profile/               User profile
-  admin/                 Admin dashboard + nested management pages
-    products/ categories/ appointments/ appointment-services/
-    rentals/ settings/
-  auth/                  login, sign-up, forgot/update password, callback, confirm, error
-  setup-admin/           First-admin bootstrap page
-  api/setup-admin/       POST endpoint that claims the first admin
-  api/store-asset/       Server-side proxy that serves the store-assets bucket
-  actions/               Server Actions (rentals.ts, appointments.ts)
-  layout.tsx             Root layout (fonts, theme providers, header/footer)
-components/              Shared UI (header, footer, cards, forms, nav)
-  ui/                    shadcn/ui primitives
-hooks/                   React hooks
+app/
+  (home)/                   landing page (route group)
+  about/ contact/           marketing pages
+  products/                 catalog list + [slug] detail, filter/sort/pagination
+  rentals/                  list, new/ booking form, [id] detail
+  appointments/             list, book/, [id] detail
+  notifications/            user notifications
+  profile/                  user profile
+  admin/                    dashboard + products, categories, appointments,
+                            appointment-services, rentals, settings
+  auth/                     login, sign-up, forgot/update password, callback, confirm, error
+  setup-admin/              first-admin bootstrap page
+  api/setup-admin/          POST endpoint that claims the first admin
+  api/store-asset/          server proxy for the store-assets bucket
+  actions/                  Server Actions (rentals.ts, appointments.ts)
+  layout.tsx                root layout: fonts, theme, header/footer
+components/
+  ui/                       shadcn/ui primitives
+  header.tsx footer.tsx     shell
+  product-card.tsx          catalog card
+  date-picker.tsx           availability-aware date picker
+  realtime-chat.tsx         realtime chat component
+hooks/                      React hooks
 lib/
-  supabase/              client.ts, server.ts, admin.ts, proxy.ts, queries.ts
-  db/                    Drizzle client (index.ts) + schema (schema.ts)
-  db.types.ts            Hand-written row interfaces used by queries
-  date-utils.ts          Date range / overlap / availability helpers
-  utils.ts, color.ts     Misc helpers
-supabase/migrations/     SQL migrations (schema, storage, security, cleanup)
-public/                  Static images (gallery, review, services, wallpaper)
-drizzle.config.ts        drizzle-kit config
-proxy.ts                 Next.js middleware entry (session refresh + route guard)
-vitest.config.mts        Vitest config
+  supabase/                 client.ts, server.ts, admin.ts, proxy.ts, queries.ts
+  db/                       Drizzle client (index.ts) + schema (schema.ts)
+  db.types.ts               hand-written row interfaces
+  date-utils.ts             date range, overlap, rental-day helpers
+  __tests__/                Vitest tests for date-utils
+supabase/migrations/        SQL schema, storage, security, cleanup
+public/                     gallery, review, services, wallpaper images
+drizzle.config.ts           drizzle-kit config
+proxy.ts                    session refresh + route guard
+vitest.config.mts           Vitest config
 ```
 
-## Database & Migrations
+## Supabase setup
 
-The **Supabase SQL migrations are the source of truth** for the database — RLS
-policies, triggers, `SECURITY DEFINER` functions, and exclusion constraints all
-live in `supabase/migrations/`. Drizzle is used for a typed query builder and
-introspection (`lib/db/schema.ts` mirrors the SQL).
-
-Migration files:
+The **Supabase SQL migrations are the source of truth** for the database — RLS policies, triggers, `SECURITY DEFINER` functions, and exclusion constraints live in `supabase/migrations/`. Drizzle mirrors the schema in `lib/db/schema.ts` for typed queries and introspection.
 
 | File | Purpose |
-|------|---------|
+| --- | --- |
 | `00001_initial_schema.sql` | Tables, RLS policies, triggers, indexes, availability functions |
-| `00002_storage_bucket.sql` | Storage buckets and their access policies |
-| `00003_security_hardening.sql` | search_path pinning, privilege-escalation guards, double-booking exclusion constraints, private payment-slips |
-| `00004_drop_stock.sql` | Removes the unused stock mechanism (availability is purely date-range based) |
+| `00002_storage_bucket.sql` | Storage buckets and access policies |
+| `00003_security_hardening.sql` | `search_path` pinning, privilege-escalation guards, double-booking constraints, private payment slips |
+| `00004_drop_stock.sql` | Removes the unused stock mechanism |
 
-### Tables
+Tables: `profiles`, `categories`, `products`, `product_images`, `store_settings`, `product_date_locks`, `rentals`, `appointment_services`, `appointments`, `notifications`.
 
-`profiles`, `categories`, `products`, `product_images`, `store_settings`,
-`product_date_locks`, `rentals`, `appointment_services`, `appointments`,
-`notifications`.
+Key SQL functions: `is_admin()`, `check_product_available(product, start, end, block_appointments)`, `get_product_unavailable_dates(product, start, end, block_appointments)`, `get_appointments_for_date(date)`, `get_rentals_for_calendar(product, start, end)`, `claim_first_admin()`, plus the `guard_profile_role()` and `guard_appointment_update()` triggers.
 
-### Key SQL functions (SECURITY DEFINER)
+Two exclusion constraints (requiring `btree_gist`) prevent overlaps: `rentals_no_overlap` for non-cancelled rentals of the same product and `appointments_no_overlap` for non-cancelled appointments of the same service. Storage buckets are `product-images`, `payment-slips` (private), `store-assets`, and `category-images`.
 
-| Function | Purpose |
-|----------|---------|
-| `is_admin()` | Admin check used by RLS policies |
-| `check_product_available(product, start, end, block_appointments)` | Returns whether a product is free in a range |
-| `get_product_unavailable_dates(product, start, end, block_from_appointments)` | Expands locks + rentals (+ appointments) into individual unavailable dates |
-| `get_appointments_for_date(date)` | Booked time slots for a day |
-| `get_rentals_for_calendar(product, start, end)` | Rental rows for the admin calendar |
-| `claim_first_admin()` | Atomically promotes the caller to admin if none exists yet |
-| `guard_profile_role()` / `guard_appointment_update()` | Triggers preventing privilege escalation and protected-column edits |
+## Getting started
 
-### Double-booking protection
-
-Two exclusion constraints provide a database-level backstop against race
-conditions (requires the `btree_gist` extension):
-
-- `rentals_no_overlap` — no two non-cancelled rentals of the same product may overlap.
-- `appointments_no_overlap` — no two non-cancelled appointments for the same service may overlap.
-
-### Storage buckets
-
-`product-images`, `payment-slips` (private), `store-assets`, `category-images`.
-Policies scope uploads/edits to admins and reads to public or owner as appropriate.
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (a version supported by Next.js and Drizzle; `drizzle.config.ts` relies on `process.loadEnvFile`, available from Node 20.12)
-- npm
-- A Supabase project (or the Supabase CLI for local development)
-
-### 1. Install dependencies
+Requirements: **Node.js >= 22.23.4** (`.nvmrc` pins `24.22.1`), **npm**, and a Supabase project (or the Supabase CLI for local development).
 
 ```bash
+git clone https://github.com/NetParamad/project-wedding.git
+cd project-wedding
 npm install
+cp .env.example .env.local   # fill in your Supabase values
 ```
 
-### 2. Configure environment variables
-
-Copy the example file and fill in your own Supabase values:
-
-```bash
-cp .env.example .env.local
-```
-
-See [Environment variables](#environment-variables) for the full list of names.
-
-### 3. Run the database migrations
-
-> **Important:** you must run the migrations before using the app — availability checks rely on `SECURITY DEFINER` SQL functions created there.
-
-Either push with the Supabase CLI:
+Run the migrations **before using the app** — availability checks rely on the `SECURITY DEFINER` functions. Either push with the CLI:
 
 ```bash
 supabase db push
 ```
 
-or run the files in order in the Supabase Dashboard → SQL Editor:
+or run the four files in order in the Supabase Dashboard → SQL Editor:
 
 - `supabase/migrations/00001_initial_schema.sql`
 - `supabase/migrations/00002_storage_bucket.sql`
 - `supabase/migrations/00003_security_hardening.sql`
 - `supabase/migrations/00004_drop_stock.sql`
 
-### 4. Run the development server
+Then start the dev server and create the first admin:
 
 ```bash
-npm run dev
+npm run dev                  # http://localhost:3000
 ```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-### 5. Create the first admin
 
 Sign up, then visit `/setup-admin` to claim the admin role for your account.
-
-### Build & test
-
-```bash
-npm run build   # production build
-npm run start   # serve the production build
-npm run lint    # ESLint
-npm test        # Vitest unit tests
-```
-
-## Environment Variables
-
-Variable **names** only — never commit real values.
-
-| Name | Scope | Purpose |
-|------|-------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Public (browser) | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Public (browser) | Supabase anon/publishable key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server only | Privileged Supabase client (`lib/supabase/admin.ts`) |
-| `DATABASE_URL` | Server only | Postgres connection string for Drizzle (`lib/db`); use the transaction pooler (port 6543) for the app runtime |
-| `DIRECT_URL` | Server only | Fallback Postgres URI for `drizzle-kit` (session pooler / direct, port 5432) |
-| `VERCEL_URL` | Server (auto) | Set automatically on Vercel; used to derive the site URL for metadata |
-
-See `.env.example` for the annotated template.
-
-## Usage
-
-### Customers
-
-- Browse dresses at `/products` and open a product at `/products/[slug]`.
-- Book a fitting at `/appointments/book`, or start a rental at `/rentals/new` after checking the calendar.
-- Track rentals at `/rentals` and appointments at `/appointments`; manage your account at `/profile`.
-
-### Admins
-
-- Open `/admin` for the dashboard (revenue, rental/booking charts, top products).
-- Manage products, categories, appointment services, appointments, rentals, and store settings from the admin sidebar.
-- Lock unavailable dates per product from the product edit page.
 
 ### Scripts
 
 | Command | Description |
-|---------|-------------|
-| `npm run dev` | Start the dev server |
+| --- | --- |
+| `npm run dev` | Dev server at `http://localhost:3000` |
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Run ESLint |
-| `npm test` | Run Vitest unit tests |
-| `npm run db:pull` | Introspect the live DB with drizzle-kit |
+| `npm test` | Vitest unit tests |
+| `npm run db:pull` | Introspect the live database with drizzle-kit |
 | `npm run db:generate` | Generate Drizzle migrations |
 | `npm run db:migrate` | Apply Drizzle migrations |
-| `npm run db:push` | Push Drizzle schema to the DB |
+| `npm run db:push` | Push the Drizzle schema to the database |
 | `npm run db:studio` | Open Drizzle Studio |
 
-## Architecture Notes
+## Environment variables
 
-### Availability checks
+Copy `.env.example` to `.env.local` and set (names only — never commit real values):
 
-- **UI** — `get_product_unavailable_dates` (RPC) fills the calendar with unavailable dates.
-- **Server (on submit)** — `check_product_available` (RPC) re-validates before saving; the exclusion constraints are the final backstop.
-- **Rental** uses `block_appointments = true` (a fitting appointment also blocks the rental date).
-- **Appointment** uses `block_appointments = false` (multiple appointments can share a day).
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase publishable (or legacy anon) key |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ for admin | Server-only privileged client in `lib/supabase/admin.ts`; never expose to the browser |
+| `DATABASE_URL` | ✅ for Drizzle | Postgres connection string for `lib/db`; use the transaction pooler (port 6543) at runtime |
 
-### `/api/store-asset` proxy
+The code also reads `DIRECT_URL` as a drizzle-kit fallback and `VERCEL_URL` (set automatically on Vercel) for `metadataBase`; neither is listed in `.env.example`. `drizzle.config.ts` loads `.env.local` through `process.loadEnvFile`.
 
-Store logo / PromptPay QR images live in the `store-assets` bucket and are served through an API route:
+## Usage
 
-```
-/api/store-asset?path=<relative-path>
-```
-
-The route validates the path against a strict key pattern (no `..`, length-capped), reads the object server-side, and returns it with a one-year immutable cache header.
-
-### `proxy.ts` middleware
-
-`proxy.ts` (backed by `lib/supabase/proxy.ts`) refreshes the Supabase session on
-every request and redirects unauthenticated users away from protected paths
-(`/appointments`, `/profile`, `/admin`, `/notifications`).
-
-### Security hardening
-
-Migration `00003` pins `search_path` on every `SECURITY DEFINER` function,
-guards against profile role escalation, blocks customers from editing
-privileged appointment columns, and makes the `payment-slips` bucket private.
-
-## Testing
-
-Tests live in `lib/__tests__/` and cover the pure helpers in
-`lib/date-utils.ts` (date-range generation, overlap detection, inclusive rental
-day counting, date formatting).
-
-```bash
-npm test
-```
+1. **Browse the catalog** — `/products` supports search, category filters, sorting, and pagination; `/products/[slug]` shows the detail and availability calendar.
+2. **Check availability** — the calendar merges date locks, rentals, and (optionally) appointments into unavailable dates.
+3. **Book a rental** — `/rentals/new` selects a product and inclusive date range, validates availability, and records pickup or delivery details.
+4. **Book an appointment** — `/appointments/book` picks a service, date, and available 09:00–18:00 slot, optionally linked to a product.
+5. **Track activity** — `/rentals`, `/appointments`, and `/notifications` show the signed-in user's records; `/profile` manages the account.
+6. **Administer** — `/admin` shows dashboard metrics and charts; the sidebar manages products, categories, appointment services, appointments, rentals, and settings. Lock dates from the product edit page.
+7. **Bootstrap the first admin** — the first authenticated user can claim the role at `/setup-admin`.
 
 ## Notes
 
-- The availability model assumes exactly one physical unit per product; `stock_qty` and the stock RPCs were removed in migration `00004`.
-- Drizzle does not read `.env.local` on its own; `drizzle.config.ts` loads it via `process.loadEnvFile`.
-- Point `DATABASE_URL` at the transaction pooler (port 6543, with `prepare: false`) for the app runtime; use the session pooler / direct URI (port 5432) for `drizzle-kit` DDL.
-- `next` is pinned to `latest` in `package.json`; check `node_modules/next/dist/docs/` before relying on framework APIs, as this version may differ from older Next.js conventions (see `AGENTS.md`).
-- TODO: production deployment details (hosting target, CI) are not documented here.
+- **Availability model** — exactly one physical unit per product. `stock_qty` and the stock RPCs were removed in migration `00004`; availability is purely date-range based.
+- **Rental validation** — the UI calls `get_product_unavailable_dates`, the server re-checks with `check_product_available` on submit, and the exclusion constraints are the final backstop. Rentals use `block_appointments = true`; appointments use `false`.
+- **`/api/store-asset`** — serves logo and PromptPay QR images from the `store-assets` bucket via `/api/store-asset?path=<relative-path>`, validating the key against a strict pattern and returning a one-year immutable cache header.
+- **`proxy.ts`** — refreshes the Supabase session on every request and redirects unauthenticated users away from `/appointments`, `/profile`, `/admin`, and `/notifications`.
+- **Pooler ports** — point `DATABASE_URL` at the transaction pooler (6543) for the app runtime; use the session pooler or direct URI (5432) for drizzle-kit DDL.
+- **Tests** — `lib/__tests__/date-utils.test.ts` covers date-range generation, overlap detection, inclusive rental-day counting, and date formatting.
+- **Next.js version** — `next` is pinned to `latest`; check `node_modules/next/dist/docs/` before relying on framework APIs (see [`AGENTS.md`](AGENTS.md)).
+- **Deployment** — no hosting target or CI workflow is documented in the repository.
+- **License** — no `LICENSE` file is present in the repository.
