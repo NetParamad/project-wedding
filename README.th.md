@@ -1,4 +1,4 @@
-[English](README.md) | [ไทย](README.th.md)
+[EN](README.md) | [TH](README.th.md)
 
 <h1 align="center">Project Store — ร้านเช่าชุดแต่งงาน</h1>
 
