@@ -191,4 +191,4 @@ npm run dev                  # http://localhost:3000
 - **การทดสอบ** — `lib/__tests__/date-utils.test.ts` ครอบคลุมการสร้างช่วงวันที่ การตรวจ overlap การนับจำนวนวันเช่าแบบนับรวม และการจัดรูปแบบวันที่
 - **เวอร์ชัน Next.js** — `next` ปักหมุดเป็น `latest`; ก่อนพึ่งพา API ของเฟรมเวิร์กให้ตรวจ `node_modules/next/dist/docs/` (ดู [`AGENTS.md`](AGENTS.md))
 - **การดีพลอย** — ยังไม่มีเอกสารระบุแพลตฟอร์มโฮสต์หรือ workflow ของ CI ใน repository
-- **สัญญาอนุญาต** — ในโปรเจกต์ยังไม่มีไฟล์ `LICENSE`
+- **สัญญาอนุญาต** — MIT (ดู [LICENSE](LICENSE))

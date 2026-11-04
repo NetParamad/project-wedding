@@ -191,4 +191,4 @@ The code also reads `DIRECT_URL` as a drizzle-kit fallback and `VERCEL_URL` (set
 - **Tests** — `lib/__tests__/date-utils.test.ts` covers date-range generation, overlap detection, inclusive rental-day counting, and date formatting.
 - **Next.js version** — `next` is pinned to `latest`; check `node_modules/next/dist/docs/` before relying on framework APIs (see [`AGENTS.md`](AGENTS.md)).
 - **Deployment** — no hosting target or CI workflow is documented in the repository.
-- **License** — no `LICENSE` file is present in the repository.
+- **License** — MIT (see [LICENSE](LICENSE)).
